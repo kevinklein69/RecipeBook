@@ -2,7 +2,7 @@
 
 Eine persönliche Rezeptbuch-Web-App, gebaut mit **Next.js 15 (App Router)**, **TypeScript**, **Tailwind CSS**, **Prisma** und **PostgreSQL** (Neon). Deploybar auf **Vercel**.
 
-## Features
+## Features test
 
 - Übersicht aller Rezepte als Karten-Grid (`/`)
 - Detailseite mit Zutaten & Zubereitungsschritten (`/recipes/[id]`)
