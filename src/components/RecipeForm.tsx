@@ -1,8 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import dynamic from "next/dynamic";
 import { VARIANTS, type RecipeVariant } from "@/lib/variants";
+
+const BarcodeScanner = dynamic(() => import("@/components/BarcodeScanner"), { ssr: false });
 
 export type RecipeFormData = {
   id?: string;
@@ -77,9 +80,33 @@ export default function RecipeForm({
     initialData?.steps?.length ? initialData.steps : [{ ...emptyStep }],
   );
 
+  const [scanningForIndex, setScanningForIndex] = useState<number | null>(null);
+  const [lookingUpIndex, setLookingUpIndex] = useState<number | null>(null);
+  const barcodeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function looksLikeBarcode(value: string) {
+    return /^\d{8,14}$/.test(value.trim());
+  }
+
+  async function lookupBarcode(index: number, barcode: string) {
+    setLookingUpIndex(index);
+    try {
+      const res = await fetch(
+        `https://world.openfoodfacts.org/api/v0/product/${barcode.trim()}.json`
+      );
+      const data = await res.json();
+      const name =
+        data.status === 1
+          ? (data.product.product_name_de || data.product.product_name || "").trim()
+          : "";
+      if (name) updateIngredient(index, "name", name);
+    } finally {
+      setLookingUpIndex(null);
+    }
+  }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -117,6 +144,11 @@ export default function RecipeForm({
           : ing,
       ),
     );
+
+    if (field === "name" && looksLikeBarcode(value)) {
+      if (barcodeTimerRef.current) clearTimeout(barcodeTimerRef.current);
+      barcodeTimerRef.current = setTimeout(() => lookupBarcode(index, value), 600);
+    }
   }
 
   function updateStep(index: number, value: string) {
@@ -342,12 +374,34 @@ export default function RecipeForm({
         <div className="space-y-2">
           {ingredients.map((ing, i) => (
             <div key={i} className="grid grid-cols-[1fr_80px_90px_32px] items-center gap-x-2">
-              <input
-                className={inputClass}
-                placeholder="z.B. Mehl"
-                value={ing.name}
-                onChange={(e) => updateIngredient(i, "name", e.target.value)}
-              />
+              <div className="relative">
+                <input
+                  className={`${inputClass} pr-8`}
+                  placeholder="z.B. Mehl"
+                  value={ing.name}
+                  onChange={(e) => updateIngredient(i, "name", e.target.value)}
+                />
+                {lookingUpIndex === i ? (
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-brand-500">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin" aria-hidden="true">
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                    </svg>
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setScanningForIndex(i)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-brand-500"
+                    tabIndex={-1}
+                    title="Barcode scannen"
+                    aria-label="Barcode scannen"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M2 4h2v16H2V4zm3 0h1v16H5V4zm2 0h3v16H7V4zm4 0h1v16h-1V4zm2 0h2v16h-2V4zm3 0h1v16h-1V4zm2 0h2v16h-2V4z"/>
+                    </svg>
+                  </button>
+                )}
+              </div>
               <input
                 type="number"
                 min={0}
@@ -451,6 +505,16 @@ export default function RecipeForm({
               : "Rezept erstellen"}
         </button>
       </div>
+
+      {scanningForIndex !== null && (
+        <BarcodeScanner
+          onResult={(name) => {
+            updateIngredient(scanningForIndex, "name", name);
+            setScanningForIndex(null);
+          }}
+          onClose={() => setScanningForIndex(null)}
+        />
+      )}
     </form>
   );
 }
