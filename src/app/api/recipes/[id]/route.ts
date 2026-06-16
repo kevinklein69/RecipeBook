@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import type { RecipeVariant } from "@/lib/variants";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,7 @@ export async function PUT(
       servings,
       prepTime,
       imageUrl,
+      variants = [],
       categories = [],
       ingredients = [],
       steps = [],
@@ -54,6 +56,7 @@ export async function PUT(
       servings?: number;
       prepTime?: number | null;
       imageUrl?: string | null;
+      variants?: RecipeVariant[];
       categories?: string[];
       ingredients?: IngredientInput[];
       steps?: StepInput[];
@@ -89,6 +92,7 @@ export async function PUT(
           servings: servings ?? 1,
           prepTime: prepTime ?? null,
           imageUrl: imageUrl ?? null,
+          variants,
           categories: {
             set: [],
             connectOrCreate: categories.map((name) => ({

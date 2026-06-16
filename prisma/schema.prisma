@@ -7,18 +7,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum RecipeVariant {
+  VEGETARISCH
+  VEGAN
+  FLEISCH
+  FISCH
+  GEFLUEGEL
+}
+
 model Recipe {
-  id          String       @id @default(cuid())
+  id          String          @id @default(cuid())
   title       String
   description String?
-  servings    Int          @default(1)
-  prepTime    Int? // Zubereitungszeit in Minuten
+  servings    Int             @default(1)
+  prepTime    Int?
   imageUrl    String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  variants    RecipeVariant[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
   ingredients Ingredient[]
   steps       Step[]
-  categories  Category[]   @relation("RecipeCategories")
+  categories  Category[]      @relation("RecipeCategories")
 }
 
 model Ingredient {

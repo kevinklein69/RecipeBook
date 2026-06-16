@@ -30,6 +30,7 @@ export default async function EditRecipePage({
     servings: recipe.servings,
     prepTime: recipe.prepTime ?? "",
     imageUrl: recipe.imageUrl ?? "",
+    variants: recipe.variants as import("@/lib/variants").RecipeVariant[],
     categories: recipe.categories.map((c) => c.name),
     ingredients: recipe.ingredients.map((ing) => ({
       name: ing.name,
@@ -44,11 +45,11 @@ export default async function EditRecipePage({
       <div className="mb-6">
         <Link
           href={`/recipes/${recipe.id}`}
-          className="text-sm text-stone-500 hover:text-stone-900"
+          className="text-sm text-slate-500 transition-colors hover:text-brand-600"
         >
           ← Zurück zum Rezept
         </Link>
-        <h1 className="mt-2 text-3xl font-bold text-stone-900">
+        <h1 className="mt-2 text-3xl font-bold text-slate-900">
           Rezept bearbeiten
         </h1>
       </div>
