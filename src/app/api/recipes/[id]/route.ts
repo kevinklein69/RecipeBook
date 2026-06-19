@@ -4,7 +4,12 @@ import type { RecipeVariant } from "@/lib/variants";
 
 export const dynamic = "force-dynamic";
 
-type IngredientInput = { name: string; amount?: number | null; unit?: string | null };
+type IngredientInput = {
+  name: string;
+  amount?: number | null;
+  unit?: string | null;
+  caloriesPer100g?: number | null;
+};
 type StepInput = { order: number; description: string };
 
 // GET /api/recipes/[id] – einzelnes Rezept
@@ -105,6 +110,7 @@ export async function PUT(
               name: ing.name,
               amount: ing.amount ?? null,
               unit: ing.unit ?? null,
+              caloriesPer100g: ing.caloriesPer100g ?? null,
             })),
           },
           steps: {

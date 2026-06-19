@@ -36,6 +36,7 @@ export default async function EditRecipePage({
       name: ing.name,
       amount: ing.amount ?? "",
       unit: ing.unit ?? "",
+      caloriesPer100g: ing.caloriesPer100g ?? "",
     })),
     steps: recipe.steps.map((s) => ({ description: s.description })),
   };
@@ -49,7 +50,7 @@ export default async function EditRecipePage({
         >
           ← Zurück zum Rezept
         </Link>
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">
+        <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
           Rezept bearbeiten
         </h1>
       </div>

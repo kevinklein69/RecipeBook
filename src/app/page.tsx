@@ -26,9 +26,11 @@ export default async function HomePage({
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900">Alle Rezepte</h1>
-        <p className="mt-1 text-slate-500">
+      <div className="mb-7">
+        <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+          Alle Rezepte
+        </h1>
+        <p className="mt-2 text-slate-500">
           {recipes.length}{" "}
           {activeVariant && `von ${totalCount} `}
           {recipes.length === 1 ? "Rezept" : "Rezepte"}{" "}
@@ -37,12 +39,12 @@ export default async function HomePage({
       </div>
 
       {/* Varianten-Filter */}
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="mb-8 flex flex-wrap gap-2">
         <Link
           href="/"
-          className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+          className={`rounded-full border px-4 py-2 text-sm font-bold transition-all ${
             !activeVariant
-              ? "border-slate-800 bg-slate-800 text-white"
+              ? "border-brand-600 bg-brand-600 text-white shadow-md shadow-brand-200"
               : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
           }`}
         >
@@ -52,9 +54,9 @@ export default async function HomePage({
           <Link
             key={v.value}
             href={activeVariant === v.value ? "/" : `/?variant=${v.value}`}
-            className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+            className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition-all ${
               activeVariant === v.value
-                ? v.activeClass
+                ? v.activeClass + " shadow-md"
                 : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
             }`}
           >
@@ -65,7 +67,7 @@ export default async function HomePage({
       </div>
 
       {recipes.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-brand-200 bg-brand-50/50 p-12 text-center">
+        <div className="rounded-3xl border border-dashed border-brand-200 bg-brand-50/50 p-12 text-center">
           <div className="mb-3 text-5xl">🍳</div>
           <p className="text-slate-500">
             {activeVariant
@@ -73,7 +75,7 @@ export default async function HomePage({
               : "Noch keine Rezepte vorhanden."}{" "}
             <Link
               href="/recipes/new"
-              className="font-medium text-brand-600 hover:underline"
+              className="font-semibold text-brand-600 hover:underline"
             >
               {activeVariant ? "Rezept erstellen" : "Erstelle dein erstes Rezept"}
             </Link>
@@ -86,15 +88,15 @@ export default async function HomePage({
             <Link
               key={recipe.id}
               href={`/recipes/${recipe.id}`}
-              className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-brand-200 hover:shadow-lg hover:shadow-brand-100/60"
+              className="group overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,23,42,0.07)] transition-all duration-200 hover:-translate-y-1.5 hover:shadow-[0_12px_28px_rgba(37,99,235,0.16)]"
             >
-              <div className="aspect-video w-full overflow-hidden bg-slate-100">
+              <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100">
                 {recipe.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={recipe.imageUrl}
                     alt={recipe.title}
-                    className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-4xl text-slate-300">
@@ -102,8 +104,8 @@ export default async function HomePage({
                   </div>
                 )}
               </div>
-              <div className="p-4">
-                <h2 className="font-semibold text-slate-900 group-hover:text-brand-600 transition-colors duration-150">
+              <div className="p-5">
+                <h2 className="text-lg font-bold text-slate-900 transition-colors duration-150 group-hover:text-brand-600">
                   {recipe.title}
                 </h2>
                 {recipe.description && (
@@ -111,7 +113,7 @@ export default async function HomePage({
                     {recipe.description}
                   </p>
                 )}
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
                   <span>🍽️ {recipe.servings} Portionen</span>
                   {recipe.prepTime != null && (
                     <span>⏱️ {recipe.prepTime} Min.</span>
@@ -124,7 +126,7 @@ export default async function HomePage({
                       return (
                         <span
                           key={v}
-                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${meta.badgeClass}`}
+                          className={`rounded-full px-2.5 py-1 text-xs font-bold ${meta.badgeClass}`}
                         >
                           {meta.emoji} {meta.label}
                         </span>
@@ -133,7 +135,7 @@ export default async function HomePage({
                     {recipe.categories.map((cat) => (
                       <span
                         key={cat.id}
-                        className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700"
+                        className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700"
                       >
                         {cat.name}
                       </span>

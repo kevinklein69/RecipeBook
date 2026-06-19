@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import { VARIANTS, type RecipeVariant } from "@/lib/variants";
+import { ingredientKcal } from "@/lib/nutrition";
 
 const BarcodeScanner = dynamic(() => import("@/components/BarcodeScanner"), { ssr: false });
 
@@ -16,7 +17,12 @@ export type RecipeFormData = {
   imageUrl: string;
   variants: RecipeVariant[];
   categories: string[];
-  ingredients: { name: string; amount: number | ""; unit: string }[];
+  ingredients: {
+    name: string;
+    amount: number | "";
+    unit: string;
+    caloriesPer100g: number | "";
+  }[];
   steps: { description: string }[];
 };
 
@@ -43,7 +49,12 @@ const UNITS = [
   },
 ];
 
-const emptyIngredient = { name: "", amount: "" as const, unit: "" };
+const emptyIngredient = {
+  name: "",
+  amount: "" as const,
+  unit: "",
+  caloriesPer100g: "" as const,
+};
 const emptyStep = { description: "" };
 
 export default function RecipeForm({
@@ -103,6 +114,10 @@ export default function RecipeForm({
           ? (data.product.product_name_de || data.product.product_name || "").trim()
           : "";
       if (name) updateIngredient(index, "name", name);
+      const kcal = data.status === 1 ? data.product.nutriments?.["energy-kcal_100g"] : null;
+      if (typeof kcal === "number") {
+        updateIngredient(index, "caloriesPer100g", String(kcal));
+      }
     } finally {
       setLookingUpIndex(null);
     }
@@ -126,7 +141,7 @@ export default function RecipeForm({
 
   function updateIngredient(
     index: number,
-    field: "name" | "amount" | "unit",
+    field: "name" | "amount" | "unit" | "caloriesPer100g",
     value: string,
   ) {
     setIngredients((prev) =>
@@ -135,7 +150,7 @@ export default function RecipeForm({
           ? {
               ...ing,
               [field]:
-                field === "amount"
+                field === "amount" || field === "caloriesPer100g"
                   ? value === ""
                     ? ""
                     : Number(value)
@@ -179,6 +194,8 @@ export default function RecipeForm({
           name: ing.name.trim(),
           amount: ing.amount === "" ? null : ing.amount,
           unit: ing.unit.trim() || null,
+          caloriesPer100g:
+            ing.caloriesPer100g === "" ? null : ing.caloriesPer100g,
         })),
       steps: steps
         .filter((s) => s.description.trim())
@@ -212,7 +229,7 @@ export default function RecipeForm({
   }
 
   const inputClass =
-    "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+    "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-100";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -222,9 +239,9 @@ export default function RecipeForm({
         </div>
       )}
 
-      <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-4 rounded-3xl bg-white p-6 shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-1 block text-sm font-bold text-slate-700">
             Titel *
           </label>
           <input
@@ -237,7 +254,7 @@ export default function RecipeForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-1 block text-sm font-bold text-slate-700">
             Beschreibung
           </label>
           <textarea
@@ -251,7 +268,7 @@ export default function RecipeForm({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-1 block text-sm font-bold text-slate-700">
               Portionen
             </label>
             <input
@@ -265,7 +282,7 @@ export default function RecipeForm({
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-1 block text-sm font-bold text-slate-700">
               Zubereitungszeit (Min.)
             </label>
             <input
@@ -281,11 +298,11 @@ export default function RecipeForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-1 block text-sm font-bold text-slate-700">
             Foto
           </label>
           {imageUrl && (
-            <div className="mb-2 overflow-hidden rounded-lg border border-slate-200">
+            <div className="mb-2 overflow-hidden rounded-2xl border border-slate-200">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageUrl}
@@ -294,7 +311,7 @@ export default function RecipeForm({
               />
             </div>
           )}
-          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-600 transition-colors hover:border-brand-400 hover:bg-brand-50 hover:text-brand-700">
+          <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-600 transition-colors hover:border-brand-400 hover:bg-brand-50 hover:text-brand-700">
             <span>{uploading ? "Wird hochgeladen…" : imageUrl ? "Anderes Foto wählen" : "Foto hochladen"}</span>
             <input
               type="file"
@@ -307,7 +324,7 @@ export default function RecipeForm({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-bold text-slate-700">
             Art des Gerichts
           </label>
           <div className="flex flex-wrap gap-2">
@@ -324,7 +341,7 @@ export default function RecipeForm({
                         : [...prev, v.value],
                     )
                   }
-                  className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition-all ${
                     isActive
                       ? v.activeClass
                       : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
@@ -339,7 +356,7 @@ export default function RecipeForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-1 block text-sm font-bold text-slate-700">
             Kategorien (kommagetrennt)
           </label>
           <input
@@ -352,28 +369,30 @@ export default function RecipeForm({
       </div>
 
       {/* Zutaten */}
-      <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-4 rounded-3xl bg-white p-6 shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Zutaten</h2>
+          <h2 className="text-lg font-bold text-slate-900">Zutaten</h2>
           <button
             type="button"
             onClick={() =>
               setIngredients((prev) => [...prev, { ...emptyIngredient }])
             }
-            className="flex items-center gap-1.5 rounded-lg border border-dashed border-brand-300 px-3 py-1.5 text-sm font-medium text-brand-600 transition-colors hover:border-brand-500 hover:bg-brand-50"
+            className="flex items-center gap-1.5 rounded-full border border-dashed border-brand-300 px-3.5 py-1.5 text-sm font-bold text-brand-600 transition-colors hover:border-brand-500 hover:bg-brand-50"
           >
             <span className="text-base leading-none">+</span> Zutat
           </button>
         </div>
-        <div className="grid grid-cols-[1fr_80px_90px_32px] gap-x-2 pb-1 text-xs font-medium text-slate-400">
+        <div className="grid grid-cols-[1fr_70px_80px_70px_70px_32px] gap-x-2 pb-1 text-xs font-medium text-slate-400">
           <span>Zutat</span>
           <span>Menge</span>
           <span>Einheit</span>
+          <span>kcal/100g</span>
+          <span>≈ kcal</span>
           <span />
         </div>
         <div className="space-y-2">
           {ingredients.map((ing, i) => (
-            <div key={i} className="grid grid-cols-[1fr_80px_90px_32px] items-center gap-x-2">
+            <div key={i} className="grid grid-cols-[1fr_70px_80px_70px_70px_32px] items-center gap-x-2">
               <div className="relative">
                 <input
                   className={`${inputClass} pr-8`}
@@ -426,6 +445,28 @@ export default function RecipeForm({
                   </optgroup>
                 ))}
               </select>
+              <input
+                type="number"
+                min={0}
+                step="any"
+                className={inputClass}
+                placeholder="—"
+                value={ing.caloriesPer100g}
+                onChange={(e) =>
+                  updateIngredient(i, "caloriesPer100g", e.target.value)
+                }
+              />
+              <span className="text-center text-sm font-medium text-brand-600">
+                {(() => {
+                  const kcal = ingredientKcal({
+                    amount: ing.amount === "" ? null : ing.amount,
+                    unit: ing.unit,
+                    caloriesPer100g:
+                      ing.caloriesPer100g === "" ? null : ing.caloriesPer100g,
+                  });
+                  return kcal != null ? Math.round(kcal) : "—";
+                })()}
+              </span>
               <button
                 type="button"
                 onClick={() =>
@@ -444,13 +485,13 @@ export default function RecipeForm({
       </div>
 
       {/* Schritte */}
-      <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-4 rounded-3xl bg-white p-6 shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Zubereitung</h2>
+          <h2 className="text-lg font-bold text-slate-900">Zubereitung</h2>
           <button
             type="button"
             onClick={() => setSteps((prev) => [...prev, { ...emptyStep }])}
-            className="flex items-center gap-1.5 rounded-lg border border-dashed border-brand-300 px-3 py-1.5 text-sm font-medium text-brand-600 transition-colors hover:border-brand-500 hover:bg-brand-50"
+            className="flex items-center gap-1.5 rounded-full border border-dashed border-brand-300 px-3.5 py-1.5 text-sm font-bold text-brand-600 transition-colors hover:border-brand-500 hover:bg-brand-50"
           >
             <span className="text-base leading-none">+</span> Schritt
           </button>
@@ -489,14 +530,14 @@ export default function RecipeForm({
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          className="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
         >
           Abbrechen
         </button>
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-500 hover:shadow-md disabled:opacity-50"
+          className="rounded-full bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-brand-200 transition-all hover:bg-brand-500 hover:shadow-lg active:scale-95 disabled:opacity-50"
         >
           {submitting
             ? "Speichern…"
@@ -508,8 +549,15 @@ export default function RecipeForm({
 
       {scanningForIndex !== null && (
         <BarcodeScanner
-          onResult={(name) => {
+          onResult={({ name, caloriesPer100g }) => {
             updateIngredient(scanningForIndex, "name", name);
+            if (caloriesPer100g != null) {
+              updateIngredient(
+                scanningForIndex,
+                "caloriesPer100g",
+                String(caloriesPer100g),
+              );
+            }
             setScanningForIndex(null);
           }}
           onClose={() => setScanningForIndex(null)}

@@ -31,12 +31,13 @@ model Recipe {
 }
 
 model Ingredient {
-  id       String  @id @default(cuid())
-  name     String
-  amount   Float?
-  unit     String?
-  recipe   Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  recipeId String
+  id              String  @id @default(cuid())
+  name            String
+  amount          Float?
+  unit            String?
+  caloriesPer100g Float?
+  recipe          Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId        String
 }
 
 model Step {

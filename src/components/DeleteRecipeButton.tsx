@@ -24,7 +24,7 @@ export default function DeleteRecipeButton({ id }: { id: string }) {
     <button
       onClick={handleDelete}
       disabled={loading}
-      className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+      className="rounded-full border border-red-200 bg-white px-4 py-2.5 text-sm font-bold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
     >
       {loading ? "Löschen…" : "Löschen"}
     </button>

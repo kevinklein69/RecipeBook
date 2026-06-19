@@ -20,17 +20,19 @@ export default function RootLayout({
   return (
     <html lang="de" className={dmSans.variable}>
       <body className="min-h-screen font-sans antialiased">
-        <header className="border-b-2 border-brand-600 bg-slate-900 shadow-lg">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-            <Link
-              href="/"
-              className="text-xl font-bold tracking-tight text-white"
-            >
-              🍳 Rezeptbuch
+        <header className="sticky top-0 z-10 border-b border-slate-100 bg-white/80 backdrop-blur-md">
+          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3.5">
+            <Link href="/" className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand-600 text-lg shadow-sm shadow-brand-200">
+                🍳
+              </span>
+              <span className="text-lg font-extrabold tracking-tight text-slate-900">
+                Rezeptbuch
+              </span>
             </Link>
             <Link
               href="/recipes/new"
-              className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-500 hover:shadow-md"
+              className="rounded-full bg-brand-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-brand-200 transition-all hover:bg-brand-500 hover:shadow-lg active:scale-95"
             >
               + Neues Rezept
             </Link>

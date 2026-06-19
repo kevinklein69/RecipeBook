@@ -13,7 +13,12 @@ export async function GET() {
   return NextResponse.json(recipes);
 }
 
-type IngredientInput = { name: string; amount?: number | null; unit?: string | null };
+type IngredientInput = {
+  name: string;
+  amount?: number | null;
+  unit?: string | null;
+  caloriesPer100g?: number | null;
+};
 type StepInput = { order: number; description: string };
 
 // POST /api/recipes – neues Rezept anlegen
@@ -68,6 +73,7 @@ export async function POST(request: Request) {
             name: ing.name,
             amount: ing.amount ?? null,
             unit: ing.unit ?? null,
+            caloriesPer100g: ing.caloriesPer100g ?? null,
           })),
         },
         steps: {

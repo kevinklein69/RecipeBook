@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 interface Props {
-  onResult: (product: { name: string; caloriesPer100g: number | null }) => void;
+  onResult: (productName: string) => void;
   onClose: () => void;
 }
 
@@ -48,11 +48,7 @@ export default function BarcodeScanner({ onResult, onClose }: Props) {
                   ? (data.product.product_name_de || data.product.product_name || "").trim()
                   : "";
               if (name) {
-                const kcal = data.product.nutriments?.["energy-kcal_100g"];
-                onResultRef.current({
-                  name,
-                  caloriesPer100g: typeof kcal === "number" ? kcal : null,
-                });
+                onResultRef.current(name);
               } else {
                 setPhase("not-found");
               }
